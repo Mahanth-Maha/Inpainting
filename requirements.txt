@@ -7,3 +7,12 @@ FastAPI
 uvicorn
 pydantic
 python-multipart
+torch 
+torchvision 
+torchaudio
+diffusers
+ipywidgets
+accelerate
+transformers
+safetensors
+matplotlib
