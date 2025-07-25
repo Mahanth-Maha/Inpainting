@@ -1,10 +1,6 @@
 data/*
-
-
-
-
-
-
+!data/example
+!data/example/*
 
 
 

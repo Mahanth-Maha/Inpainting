@@ -6,4 +6,4 @@ opencv-python
 FastAPI
 uvicorn
 pydantic
-Pillow
+python-multipart
