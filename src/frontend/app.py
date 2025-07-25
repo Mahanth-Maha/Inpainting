@@ -8,50 +8,38 @@ API_URL = "http://localhost:8000"
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
-# if uploaded_file is not None:
-#     st.image(uploaded_file, caption='Uploaded Image', use_column_width=True)
+# def invert_image(image):
+#     files = {
+#         "image": (
+#             image.name,
+#             image.getvalue(),
+#             image.type
+#         )
+#     }
+#     invert_response = requests.post(f"{API_URL}/invertimage", files=files)
+#     return invert_response
 
-#     files = {"file": uploaded_file.getvalue()}
-#     response = requests.post(f"{API_URL}/process", files=files)
+# def blur_image(image):
+#     files = {
+#         "image": (
+#             image.name,
+#             image.getvalue(),
+#             image.type
+#         )
+#     }
+#     blur_response = requests.post(f"{API_URL}/blurimage", files=files)
+#     return blur_response
 
-#     if response.status_code == 200:
-#         st.success("Image processed successfully!")
-#         st.image(response.content, caption='Processed Image', use_column_width=True)
-#     else:
-#         st.error("Error processing image.")
-
-def invert_image(image):
-    files = {
-        "image": (
-            image.name,
-            image.getvalue(),
-            image.type
-        )
-    }
-    invert_response = requests.post(f"{API_URL}/invertimage", files=files)
-    return invert_response
-
-def blur_image(image):
-    files = {
-        "image": (
-            image.name,
-            image.getvalue(),
-            image.type
-        )
-    }
-    blur_response = requests.post(f"{API_URL}/blurimage", files=files)
-    return blur_response
-
-def black_and_white_image(image):
-    files = {
-        "image": (
-            image.name,
-            image.getvalue(),
-            image.type
-        )
-    }
-    bw_response = requests.post(f"{API_URL}/blackandwhite", files=files)
-    return bw_response
+# def black_and_white_image(image):
+#     files = {
+#         "image": (
+#             image.name,
+#             image.getvalue(),
+#             image.type
+#         )
+#     }
+#     bw_response = requests.post(f"{API_URL}/blackandwhite", files=files)
+#     return bw_response
         
 if uploaded_file is not None:
     st.image(uploaded_file, caption='Uploaded Image', use_column_width=True)
@@ -68,18 +56,18 @@ if uploaded_file is not None:
             obj_detect_response = requests.post(f"{API_URL}/detectobjects", files=files)
         if obj_detect_response.status_code == 200:
             st.success("Objects detected successfully!")
-            st.image(obj_detect_response.content, caption='Detected Objects', use_column_width=True)
+            # st.image(obj_detect_response.content, caption='Detected Objects', use_column_width=True)
         else:
             st.error("Error detecting objects.")
 
     if obj_detect_response.status_code == 200:
         detected_objects = []
         try:
-            detected_objects = obj_detect_response.headers.get("X-Objects")
-            if detected_objects:
-                detected_objects = json.loads(detected_objects)
-            else:
-                detected_objects = []
+            detected_objects = obj_detect_response.json().get("X-Objects")
+            # if detected_objects:
+            #     detected_objects = json.loads(detected_objects)
+            # else:
+            #     detected_objects = []
         except Exception:
             detected_objects = []
         selected_objects = st.multiselect(

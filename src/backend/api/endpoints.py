@@ -23,13 +23,12 @@ async def detect_objects(image: UploadFile = File(...), verbose: bool = True):
             print(f"Image size: {img.size}")
             print(f"Type of image: {type(img)}")
         
-        odm_model = PretrainedODM(pretrained_model_name=0)
         objects_detected = odm_model.get_objects(img)
         
         if verbose:
             print(f"Objects detected: {objects_detected}")
         
-        return {"X-objects": objects_detected}
+        return {"X-Objects": objects_detected}
     except Exception as e:
         return {"error": str(e)}
         # return {"message": "Object detection not implemented yet."}
@@ -39,7 +38,7 @@ async def inpaint_image(
         image: UploadFile = File(...), 
         # mask: UploadFile = File(...), 
         # prompt: str = "", 
-        objects_selected :str = None,
+        objects_selected :list= None,
         verbose: bool = True
     ):
     try:

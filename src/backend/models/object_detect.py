@@ -8,6 +8,11 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
 import json
+import dotenv
+
+dotenv.load_dotenv()
+
+ANNOTE_MAPPING_FILE_PATH = dotenv.get_key(dotenv.find_dotenv(), "ANNOTE_MAPPING_FILE_PATH")
 
 PRETRAINED_ODM_MODELS = [
     "maskrcnn_resnet50_fpn"
@@ -19,9 +24,15 @@ class PretrainedODM:
         self.model_name = PRETRAINED_ODM_MODELS[pretrained_model_name]
         self.model = maskrcnn_resnet50_fpn(pretrained=True).to(self.device)
         self.model.eval()
-        self.idx_to_label = json.load(open("annotations/coco_category_mapping.json"))
+        self.idx_to_label = json.load(open(ANNOTE_MAPPING_FILE_PATH))
         self.label_to_idx = {v: k for k, v in self.idx_to_label.items()}
-
+    
+    def predict(self, image):
+        image_tensor = F.to_tensor(image).unsqueeze(0).to(self.device)
+        with torch.no_grad():
+            outputs = self.model(image_tensor)
+        return outputs  
+    
     def get_objects(self, image) -> list:
         # Perform inference on the input image and return the predictions
         # fig, ax = plt.subplots(1, figsize=(12, 8))
@@ -60,14 +71,14 @@ class PretrainedODM:
         
         return list(detected_labels)
 
-    def get_mask(self, image, object) -> PIL.Image.Image:
+    def get_mask(self, image, detr_idx:list) -> PIL.Image.Image:
         # Preprocess the image before feeding it to the model
         outputs = self.predict(image)
         threshold = 0.5
         image_np = np.array(image).copy()  # Original image as NumPy array (H, W, 3)
         image_np.fill(0)  # Set all pixels to white
         for i in range(len(outputs[0]['scores'])):
-            if outputs[0]['scores'][i] > threshold and outputs[0]['labels'][i].item() in detect_idx:
+            if outputs[0]['scores'][i] > threshold and outputs[0]['labels'][i].item() in detr_idx:
                 mask = outputs[0]['masks'][i, 0].mul(255).byte().cpu().numpy()
                 binary_mask = mask > 127
                 # set masked region to black and rest white
@@ -82,3 +93,13 @@ class PretrainedODM:
         return masked_image
 
         
+
+class CustomODM:
+    def __init__(self, pretrained_model_name):
+        pass 
+    
+    def get_objects(self, image) -> list:
+        pass
+
+    def get_mask(self, image, object) -> PIL.Image.Image:
+        pass 

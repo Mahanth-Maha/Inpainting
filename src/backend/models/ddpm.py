@@ -4,6 +4,7 @@ from diffusers import AutoPipelineForInpainting
 
 
 PRETRAINED_DDPM_MODELS = [
+    "runwayml/stable-diffusion-inpainting",
     "kandinsky-community/kandinsky-2-2-decoder-inpaint",
     "CompVis/stable-diffusion-v1-4",
 ]
