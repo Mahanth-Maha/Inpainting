@@ -6,4 +6,13 @@ opencv-python
 FastAPI
 uvicorn
 pydantic
-Pillow
+python-multipart
+torch 
+torchvision 
+torchaudio
+diffusers
+ipywidgets
+accelerate
+transformers
+safetensors
+matplotlib
