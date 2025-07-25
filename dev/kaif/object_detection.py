@@ -8,8 +8,8 @@ import numpy as np
 import json
 
 class TorchvisionRCNN() :
-    def __init__(self, model_name='maskrcnn_resnet50_fpn', device='cuda'):
-        self.device = device
+    def __init__(self, model_name='maskrcnn_resnet50_fpn'):
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model = maskrcnn_resnet50_fpn(pretrained=True).to(self.device)
         self.model.eval()
         self.idx_to_label = json.load(open("annotations/coco_category_mapping.json"))
@@ -23,38 +23,39 @@ class TorchvisionRCNN() :
     
     def get_all_objects(self, image, outputs, threshold=0.5, image_name=None, output_path=None):
         
-        fig, ax = plt.subplots(1, figsize=(12, 8))
-        image_np = np.array(image).copy()
-        detected_labels = set()
-        ax.imshow(image_np)
-        for i in range(len(outputs[0]['scores'])):
-            score = outputs[0]['scores'][i].item()
-            if score < threshold:
-                continue
-            else :
-                detected_labels.add(self.idx_to_label[str(outputs[0]['labels'][i].item())])
-            idx = outputs[0]['labels'][i].item()
-            label = self.idx_to_label[str(idx)]
-            box = outputs[0]['boxes'][i].cpu().numpy()
-            x1, y1, x2, y2 = box
+            fig, ax = plt.subplots(1, figsize=(12, 8))
+            image_np = np.array(image).copy()
+            detected_labels = set()
+            ax.imshow(image_np)
+            for i in range(len(outputs[0]['scores'])):
+                score = outputs[0]['scores'][i].item()
+                if score < threshold:
+                    continue
+                else :
+                    detected_labels.add(self.idx_to_label[str(outputs[0]['labels'][i].item())])
+                idx = outputs[0]['labels'][i].item()
+                label = self.idx_to_label[str(idx)]
+                box = outputs[0]['boxes'][i].cpu().numpy()
+                x1, y1, x2, y2 = box
 
-            # Draw bounding box
-            rect = patches.Rectangle((x1, y1), x2 - x1, y2 - y1,
-                                    linewidth=2, edgecolor='red', facecolor='none')
-            ax.add_patch(rect)
+                # Draw bounding box
+                rect = patches.Rectangle((x1, y1), x2 - x1, y2 - y1,
+                                        linewidth=2, edgecolor='red', facecolor='none')
+                ax.add_patch(rect)
 
-            # Add label + score text
-            ax.text(x1, y1 - 5,
-                    f"Label: {label}, Score: {score:.2f}",
-                    bbox=dict(facecolor='yellow', alpha=0.5),
-                    fontsize=9, color='black')
+                # Add label + score text
+                ax.text(x1, y1 - 5,
+                        f"Label: {label}, Score: {score:.2f}",
+                        bbox=dict(facecolor='yellow', alpha=0.5),
+                        fontsize=9, color='black')
+            
+            plt.axis('off')
+            plt.title("All Detected objects")
+            plt.savefig(f"{output_path}/{image_name}_all_abj.png", bbox_inches='tight')
+            plt.close()
+            print(f"Detected labels: {detected_labels}")
+        return f"{output_path}/{image_name}_all_abj.png", detected_labels
         
-        plt.axis('off')
-        plt.title("All Detected objects")
-        plt.savefig(f"{output_path}/{image_name}_all_abj.png", bbox_inches='tight')
-        plt.close()
-        print(f"Detected labels: {detected_labels}")
-        # return detected_labels
         
     
     def get_specific_object(self, image, outputs,  detect_idx=None, threshold=0.5, image_name=None, output_path=None):
@@ -167,7 +168,7 @@ class TorchvisionRCNN() :
                 detect_idx.append(int(self.label_to_idx[label]))
             
         # detected_labels = self.get_all_objects(image, outputs, threshold) 
-        print(f"Detected labels: {detect_label}")
+        # print(f"Detected labels: {detect_label}")
         self.get_all_objects(image, outputs, threshold, image_name, output_path) 
         print(f"Detecting specific objects: {detect_label}")
         self.get_specific_object(image, outputs, detect_idx, threshold, image_name, output_path)
@@ -180,7 +181,7 @@ class TorchvisionRCNN() :
 
         
 
-        
+    
 
 
         
