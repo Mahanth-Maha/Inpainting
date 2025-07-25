@@ -1,0 +1,9 @@
+Streamlit
+numpy
+Pillow
+requests
+opencv-python
+FastAPI
+uvicorn
+pydantic
+Pillow
