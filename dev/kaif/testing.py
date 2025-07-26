@@ -7,7 +7,7 @@ import matplotlib.patches as patches
 import numpy as np
 import json
 
-from object_detection import TorchvisionRCNN 
+from dev.kaif.dev_object_detection import TorchvisionRCNN 
 model = TorchvisionRCNN (
     model_name="maskrcnn_resnet50_fpn",
     device = "cuda" if torch.cuda.is_available() else "cpu"

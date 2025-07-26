@@ -1,7 +1,12 @@
 import torch
 import PIL
+import datetime
+import dotenv
 from diffusers import AutoPipelineForInpainting
 
+dotenv.load_dotenv()
+dot_env_file = dotenv.find_dotenv()
+DEBUG_LEVEL = dotenv.get_key(dot_env_file, "DEBUG_LEVEL")
 
 PRETRAINED_DDPM_MODELS = [
     "runwayml/stable-diffusion-inpainting",
@@ -9,8 +14,9 @@ PRETRAINED_DDPM_MODELS = [
     "CompVis/stable-diffusion-v1-4",
 ]
 
+
 class PretrainedDDPM:
-    def __init__(self, pretrained_model_name = 0, model_params=None):
+    def __init__(self, pretrained_model_name=0, model_params=None):
         self.model_params = model_params
         self.model_name = PRETRAINED_DDPM_MODELS[pretrained_model_name]
         self.pipe = AutoPipelineForInpainting.from_pretrained(
@@ -19,9 +25,10 @@ class PretrainedDDPM:
         )
         self.pipe.enable_model_cpu_offload()
         self.pipe.to("cuda")
-        
 
-    def forward(self, input_image, mask_image, prompt=""):
+    def forward(self, input_image, mask_image, prompt=None):
+        if prompt is None or prompt == "":
+            prompt = "remove the object and fill based on environment"
         return self.pipe(
             prompt=prompt,
             image=input_image,
@@ -31,8 +38,17 @@ class PretrainedDDPM:
         ).images[0]
 
     def inference(self, input_data):
-        model_output = self.forward(input_data['image'], input_data['mask'], prompt=input_data.get('prompt', ""))
-        model_output = self.scale_back_to_original(model_output, input_data['image'])
+        model_output = self.forward(
+            input_data['image'], input_data['mask'], prompt=input_data.get('prompt', None))
+        model_output = self.scale_back_to_original(
+            model_output, input_data['image'])
+        if DEBUG_LEVEL == "DEBUG":
+            print(
+                f"Model output type: {type(model_output)}, size: {model_output.size if isinstance(model_output, PIL.Image.Image) else model_output.shape}")
+            time_as_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            input_data['image'].save(f"debug_ddpm_{time_as_str}_input.png")
+            input_data['mask'].save(f"debug_ddpm_{time_as_str}_mask.png")
+            model_output.save(f"debug_ddpm_{time_as_str}_output.png")
         return model_output
 
     def scale_back_to_original(self, output, img):
@@ -44,7 +60,8 @@ class PretrainedDDPM:
             ).squeeze(0)
         else:
             raise ValueError("Unsupported output type")
-    
+
+
 class CustomDDPM:
     def __init__(self, model_params):
         self.model_params = model_params

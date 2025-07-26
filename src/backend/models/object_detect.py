@@ -1,22 +1,29 @@
-import io 
 import PIL
 import torch
-from torchvision.models.detection import maskrcnn_resnet50_fpn
-from torchvision.transforms import functional as F
-from PIL import Image, ImageOps
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import numpy as np
 import json
 import dotenv
+import datetime
+import matplotlib.pyplot as plt
+
+from PIL import Image
+from torchvision.models.detection import maskrcnn_resnet50_fpn
+from torchvision.transforms import functional as F
+
 
 dotenv.load_dotenv()
+dot_env_file = dotenv.find_dotenv()
 
-ANNOTE_MAPPING_FILE_PATH = dotenv.get_key(dotenv.find_dotenv(), "ANNOTE_MAPPING_FILE_PATH")
+ANNOTE_MAPPING_FILE_PATH = dotenv.get_key(dot_env_file, "ANNOTE_MAPPING_FILE_PATH")
+DEBUG_LEVEL = dotenv.get_key(dot_env_file, "DEBUG_LEVEL")
+VERBOSE = True if DEBUG_LEVEL == "DEBUG" else False
+
 
 PRETRAINED_ODM_MODELS = [
-    "maskrcnn_resnet50_fpn"
+    "maskrcnn_resnet50_fpn",
+    # More models here
 ]
+
 
 class PretrainedODM:
     def __init__(self, pretrained_model_name):
@@ -26,80 +33,92 @@ class PretrainedODM:
         self.model.eval()
         self.idx_to_label = json.load(open(ANNOTE_MAPPING_FILE_PATH))
         self.label_to_idx = {v: k for k, v in self.idx_to_label.items()}
-    
+
     def predict(self, image):
         image_tensor = F.to_tensor(image).unsqueeze(0).to(self.device)
         with torch.no_grad():
             outputs = self.model(image_tensor)
-        return outputs  
-    
-    def get_objects(self, image) -> list:
-        # Perform inference on the input image and return the predictions
-        # fig, ax = plt.subplots(1, figsize=(12, 8))
+        return outputs
+
+    def get_objects(self, image, threshold=0.5, verbose=VERBOSE) -> list:
         outputs = self.predict(image)
-        threshold = 0.5
-        # image_np = np.array(image).copy()
+        
         detected_labels = set()
-        # ax.imshow(image_np)
         for i in range(len(outputs[0]['scores'])):
             score = outputs[0]['scores'][i].item()
             if score < threshold:
                 continue
-            else :
-                detected_labels.add(self.idx_to_label[str(outputs[0]['labels'][i].item())])
-            # idx = outputs[0]['labels'][i].item()
-            # label = self.idx_to_label[str(idx)]
-            # box = outputs[0]['boxes'][i].cpu().numpy()
-            # x1, y1, x2, y2 = box
+            else:
+                detected_labels.add(
+                    self.idx_to_label[str(outputs[0]['labels'][i].item())])
 
-            # Draw bounding box
-            # rect = patches.Rectangle((x1, y1), x2 - x1, y2 - y1,
-            #                         linewidth=2, edgecolor='red', facecolor='none')
-            # ax.add_patch(rect)
-
-            # Add label + score text
-            # ax.text(x1, y1 - 5,
-            #         f"Label: {label}, Score: {score:.2f}",
-            #         bbox=dict(facecolor='yellow', alpha=0.5),
-            #         fontsize=9, color='black')
-        
-        # plt.axis('off')
-        # plt.title("All Detected objects")
-        # plt.savefig(f"{output_path}/{image_name}_all_abj.png", bbox_inches='tight')
-        # plt.close()
-        # print(f"Detected labels: {detected_labels}")
-        
         return list(detected_labels)
 
-    def get_mask(self, image, detr_idx:list) -> PIL.Image.Image:
-        # Preprocess the image before feeding it to the model
+    def get_mask(self, image, detect_objects_list, threshold=0.5, verbose=VERBOSE):
         outputs = self.predict(image)
-        threshold = 0.5
-        image_np = np.array(image).copy()  # Original image as NumPy array (H, W, 3)
-        image_np.fill(0)  # Set all pixels to white
-        for i in range(len(outputs[0]['scores'])):
-            if outputs[0]['scores'][i] > threshold and outputs[0]['labels'][i].item() in detr_idx:
-                mask = outputs[0]['masks'][i, 0].mul(255).byte().cpu().numpy()
-                binary_mask = mask > 127
-                # set masked region to black and rest white
-                image_np[binary_mask] = [255, 255, 255]
-        # Convert the modified NumPy array back to a PIL Image
-        # plt.imshow(image_np)
-        # plt.axis('off')
-        # plt.savefig(f"{output_path}/{image_name}_masked_2.png", bbox_inches='tight', pad_inches=0)
-        # plt.close()
+        image_np = np.array(image).copy()
+        image_np.fill(0)
+
+        try:
+            detect_ids = []
+            for label in detect_objects_list:
+                norm_label = label.strip().lower()
+                matched = next(
+                    (k for k in self.label_to_idx if k.lower() == norm_label), None)
+                if matched:
+                    detect_ids.append(int(self.label_to_idx[matched]))
+                else:
+                    if verbose:
+                        print(f"Label '{label}' not found in label_to_idx")
+        except Exception as e:
+            print(f"Error processing detect_objects_list: {e}")
+            detect_ids = []
+
+        if verbose:
+            print(f"Type of image: {type(image)}, Size: {image.size}")
+            print(f"To Detect objects: {detect_objects_list} → {detect_ids}")
+            print(f"outputs: {type(outputs) = },\n\t {len(outputs) = }")
+            print(
+                f"outputs[0]: {type(outputs[0]) = },\n\t if dict keys {outputs[0].keys() if isinstance(outputs[0], dict) else 'N/A'}")
+            print(
+                f"outputs[0]['scores']: {type(outputs[0]['scores']) = },\n\t size if Torch Tensor: {outputs[0]['scores'].size() if isinstance(outputs[0]['scores'], torch.Tensor) else 'N/A'}")
+
+        for idx, score in enumerate(outputs[0]['scores']):
+            if score < threshold:
+                continue
+
+            label_id = outputs[0]['labels'][idx].item()
+            if label_id not in detect_ids:
+                continue
+
+            mask = outputs[0]['masks'][idx, 0].mul(255).byte().cpu().numpy()
+            image_np[mask > 127] = [255, 255, 255]
+
+        if verbose:
+            print(
+                f"Type of image_np: {type(image_np)}, Size: {image_np.shape}")
 
         masked_image = Image.fromarray(image_np, mode='RGB')
+
+        if verbose:
+            print(
+                f"Type of masked_image: {type(masked_image)}, Size: {masked_image.size}")
+            plt.imshow(masked_image)
+            plt.axis('off')
+            time_as_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            plt.savefig(
+                f"debug_obj_det_{time_as_str}_mask.png", bbox_inches='tight', pad_inches=0)
+            plt.close()
+
         return masked_image
 
-        
 
 class CustomODM:
     def __init__(self, pretrained_model_name):
-        pass 
-    
-    def get_objects(self, image) -> list:
         pass
 
-    def get_mask(self, image, object) -> PIL.Image.Image:
-        pass 
+    def get_objects(self, image, threshold=0.5, verbose=VERBOSE) -> list:
+        pass
+
+    def get_mask(self, image, object, threshold=0.5, verbose=VERBOSE) -> PIL.Image.Image:
+        pass

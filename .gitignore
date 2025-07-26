@@ -1,21 +1,18 @@
 data/*
+dataset
 !data/example
 !data/example/*
 *.pdf
+*.zip
 
 
 dev/kaif/annotations/*.json
 !dev/kaif/annotations/coco_category_mapping.json
-
-
-*.zip
-
-dataset
+src/backend/debug*
 
 
 
 .env
-
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

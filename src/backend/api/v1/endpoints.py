@@ -44,13 +44,13 @@ async def detect_objects(
             print(f"Objects detected: {objects_detected}")
 
         return {"X-Objects": objects_detected}
+
     except Exception as e:
         return {"error": str(e)}
-        # return {"message": "Object detection not implemented yet."}
 
 
 @router.post("/inpaint")
-async def inpaint_image(
+async def inpaint_image_v1(
     image: UploadFile = File(...),
     object: str = File(...),
     verbose: bool = VERBOSE,
@@ -81,12 +81,13 @@ async def inpaint_image(
         inpainted_img.save(buffer, format="PNG")
         buffer.seek(0)
         return StreamingResponse(buffer, media_type="image/png")
+
     except Exception as e:
         return {"error": str(e)}
 
 
 @router.post("/invertimage")
-async def invert_image(image: UploadFile = File(...)):
+async def invert_image_v1(image: UploadFile = File(...)):
     try:
         contents = await image.read()
         img = Image.open(io.BytesIO(contents)).convert("RGB")
@@ -100,7 +101,7 @@ async def invert_image(image: UploadFile = File(...)):
 
 
 @router.post("/blurimage")
-async def blur_image(image: UploadFile = File(...)):
+async def blur_image_v1(image: UploadFile = File(...)):
     try:
         contents = await image.read()
         img = Image.open(io.BytesIO(contents)).convert("RGB")
@@ -114,7 +115,7 @@ async def blur_image(image: UploadFile = File(...)):
 
 
 @router.post("/blackandwhite")
-async def black_and_white_image(image: UploadFile = File(...)):
+async def black_and_white_image_v1(image: UploadFile = File(...)):
     try:
         contents = await image.read()
         img = Image.open(io.BytesIO(contents)).convert("RGB")
