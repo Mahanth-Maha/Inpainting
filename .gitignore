@@ -4,6 +4,16 @@ data/*
 *.pdf
 
 
+dev/kaif/annotations/*.json
+!dev/kaif/annotations/coco_category_mapping.json
+
+
+*.zip
+
+dataset
+
+
+
 .env
 
 

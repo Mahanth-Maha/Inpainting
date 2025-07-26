@@ -16,3 +16,4 @@ accelerate
 transformers
 safetensors
 matplotlib
+pycocotools
