@@ -1,3 +1,4 @@
+from calendar import prmonth
 import io
 import json
 import dotenv
@@ -26,7 +27,7 @@ async def health_check():
 
 
 @router.post("/detectobjects")
-async def detect_objects(
+async def detect_objects_v1(
     image: UploadFile = File(...),
     verbose: bool = VERBOSE,
 ):
@@ -53,16 +54,19 @@ async def detect_objects(
 async def inpaint_image_v1(
     image: UploadFile = File(...),
     object: str = File(...),
+    prompt: str = File(...),
     verbose: bool = VERBOSE,
 ):
     try:
         image_contents = await image.read()
-        objects_selected = json.loads(object)
+        objects_selected = json.loads(object) 
         if verbose:
             print(f"Image contents type: {type(image_contents)}")
             print(f"Image size: {len(image_contents)} bytes")
             print(f"Objects selected: {objects_selected}")
             print(f"Type of objects_selected: {type(objects_selected)}")
+            print(f"Prompt: {prompt}")
+            
         img = Image.open(io.BytesIO(image_contents)).convert("RGB")
         mask_img = odm_model.get_mask(img, objects_selected)
 
@@ -70,11 +74,28 @@ async def inpaint_image_v1(
             print(f"Mask image size: {mask_img.size}, Image size: {img.size}")
             print(f"Type of mask image: {type(img)} : {img.size}")
             print(f"Type of mask image: {type(mask_img)} : {mask_img.size}")
-
-        inpainted_img = ddpm_model.inference({
+        
+        ddpm_model_input = {
             'image': img,
             'mask': mask_img,
-        })
+        }
+        
+        # if prompt is None or prompt.strip() == "":
+        #     inpainted_img = ddpm_model.inference({
+        #         'image': img,
+        #         'mask': mask_img,
+        #     })
+        # else:
+        #     inpainted_img = ddpm_model.inference({
+        #         'image': img,
+        #         'mask': mask_img,
+        #         'prompt': prompt,
+        #     })
+        
+        if prompt and prompt.strip():
+            ddpm_model_input['prompt'] = prompt
+        
+        inpainted_img = ddpm_model.inference(ddpm_model_input)
         if verbose:
             print(f"Inpainted image type: {type(inpainted_img)}")
         buffer = io.BytesIO()
@@ -86,48 +107,69 @@ async def inpaint_image_v1(
         return {"error": str(e)}
 
 
-@router.post("/invertimage")
-async def invert_image_v1(image: UploadFile = File(...)):
+@router.post("/filter")
+async def filter_image_v1(
+    image: UploadFile = File(...),
+    filter_type: str = File(...),
+    verbose: bool = VERBOSE,
+):
     try:
-        contents = await image.read()
-        img = Image.open(io.BytesIO(contents)).convert("RGB")
-        inverted_img = Image.eval(img, lambda x: 255 - x)
+        if verbose:
+            print(f"Filter type: {filter_type}")
+        image_contents = await image.read()
+        if verbose:
+            print(f"Image contents type: {type(image_contents)}")
+            print(f"Image size: {len(image_contents)} bytes")
+        # filter_name = json.loads(filter_type)
+        filter_name = filter_type.lower()
+        img = Image.open(io.BytesIO(image_contents)).convert("RGB")
+        if filter_name == "invert":
+            filtered_img = Image.eval(img, lambda x: 255 - x)
+        elif filter_name == "blur":
+            filtered_img = img.filter(ImageFilter.BLUR)
+        elif filter_name == "sharpen":
+            filtered_img = img.filter(ImageFilter.SHARPEN)
+        elif filter_name == "black_and_white":
+            filtered_img = img.convert("L")
+        else:
+            return {"error": "Unknown filter"}
+        if verbose:
+            print(f"Filtered image size: {filtered_img.size}")
+            print(f"Type of filtered image: {type(filtered_img)}")
         buffer = io.BytesIO()
-        inverted_img.save(buffer, format="PNG")
+        filtered_img.save(buffer, format="PNG")
         buffer.seek(0)
         return StreamingResponse(buffer, media_type="image/png")
     except Exception as e:
         return {"error": str(e)}
 
-
-@router.post("/blurimage")
-async def blur_image_v1(image: UploadFile = File(...)):
+@router.post("/manualinpaint")
+async def inpaint_manual_mask_v1(
+    image: UploadFile = File(...),
+    mask: UploadFile = File(...),
+    prompt: str = File(...),
+    verbose: bool = VERBOSE,
+):
     try:
-        contents = await image.read()
-        img = Image.open(io.BytesIO(contents)).convert("RGB")
-        blurred_img = img.filter(ImageFilter.BLUR)
+        image_bytes = await image.read()
+        mask_bytes = await mask.read()
+
+        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        mask_img = Image.open(io.BytesIO(mask_bytes)).convert("L").resize(img.size)
+
+        ddpm_model_input = {
+            'image': img,
+            'mask': mask_img,
+        }        
+        if prompt and prompt.strip():
+            ddpm_model_input['prompt'] = prompt
+
+        inpainted_img = ddpm_model.inference(ddpm_model_input)
+
         buffer = io.BytesIO()
-        blurred_img.save(buffer, format="PNG")
+        inpainted_img.save(buffer, format="PNG")
         buffer.seek(0)
         return StreamingResponse(buffer, media_type="image/png")
     except Exception as e:
         return {"error": str(e)}
 
-
-@router.post("/blackandwhite")
-async def black_and_white_image_v1(image: UploadFile = File(...)):
-    try:
-        contents = await image.read()
-        img = Image.open(io.BytesIO(contents)).convert("RGB")
-        bw_img = img.convert("L")
-        buffer = io.BytesIO()
-        bw_img.save(buffer, format="PNG")
-        buffer.seek(0)
-        return StreamingResponse(buffer, media_type="image/png")
-    except Exception as e:
-        buffer = io.BytesIO()
-        bw_img.save(buffer, format="PNG")
-        buffer.seek(0)
-        return StreamingResponse(buffer, media_type="image/png")
-    except Exception as e:
-        return {"error": str(e)}

@@ -9,8 +9,7 @@ dataset
 dev/kaif/annotations/*.json
 !dev/kaif/annotations/coco_category_mapping.json
 src/backend/debug*
-
-
+src/frontend/temp
 
 .env
 
