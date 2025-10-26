@@ -111,6 +111,14 @@
             box-shadow: 0 6px 20px rgba(40, 64, 122, 0.6);
         }
 
+        .btn-outline {
+            background: #15161a;
+            box-shadow: 0 4px 15px rgba(11, 18, 34, 0.4);
+        }
+
+        .btn-outline:hover {
+            box-shadow: 0 6px 20px rgba(11, 18, 34, 0.6);
+        }
         main {
             background: white;
             margin: 40px auto;
@@ -427,6 +435,7 @@
             font-size: 1.1em;
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
     <header>
@@ -439,8 +448,15 @@
             </p>
             <p class="affiliation">Indian Institute of Science, Bengaluru</p>
             <div class="buttons">
-                <a href="https://github.com/Mahanth-Maha/Inpainting" class="btn" target="_blank">View on GitHub</a>
-                <a href="https://github.com/Mahanth-Maha/Inpainting#demo" class="btn btn-secondary" target="_blank">See Demo</a>
+                <!-- <a href="https://github.com/Mahanth-Maha/Inpainting" class="btn" target="_blank">View on GitHub</a> -->
+                <a href="https://github.com/Mahanth-Maha/Inpainting" class="btn" target="_blank">
+                    <i class="fab fa-github" style="color: #ffffff; font-size: 18px; margin-right: 8px;"></i> View on GitHub
+                </a>
+                <a href="https://github.com/Mahanth-Maha/Inpainting/#demo" class="btn btn-secondary"     target="_blank">
+                    <i class="fa-solid fa-chalkboard" style="color: #ffffff; font-size: 18px; margin-right: 8px;"></i> See Demo
+                </a>
+                <!-- <a href="https://mahanthyalla.in/Inpainting/#demo" class="btn btn-secondary" target="_blank">See Demo 📄</a>
+                <a href="https://github.com/Mahanth-Maha/Inpainting#demo" class="btn btn-secondary" target="_blank">See Demo</a> -->
             </div>
         </div>
     </header>
@@ -1054,7 +1070,9 @@ streamlit run app.py</code></pre>
                     <p style="margin-top: 10px;">M.Tech Artificial Intelligence,<br>Indian Institute of Science, Bengaluru</p>
                 </div>
             </div>
-            
+        </section>
+        <section id="more-projects" style="text-align: center; margin: 20px 0;">
+            <a href="https://mahanthyalla.in/projects" class="btn btn-outline">See All Projects of Mine →</a>
         </section>
     </main>
 
