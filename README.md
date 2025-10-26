@@ -85,11 +85,11 @@ This project provides a web application for inpainting images, allowing users to
 ### Website - PC 
 
 <figure style="width:90%;">
-   <img src="assets/Webpage_PC_01.png" alt="First" style="width:100%;">
+   <img src="assets/Webpage_PC_01_Medium.png" alt="First" style="width:100%;">
    <figcaption>Streamlit web page interface with uploaded image of kids playing football, selected object to remove as SportsBall <em>(Optionally we can add to replace with any object, here 'Bucket' text is just to demonstrate we can also add such request, but results below is generated without any text, hence removes and added shoe and NO bucket)</em></figcaption>
 </figure>
 <figure style="width:90%;">
-   <img src="assets/Webpage_PC_02.png" alt="Second" style="width:100%;">
+   <img src="assets/Webpage_PC_02_Medium.png" alt="Second" style="width:100%;">
    <figcaption>Results of above sportsball removal </figcaption>
 </figure>
 
@@ -97,22 +97,22 @@ This project provides a web application for inpainting images, allowing users to
 
 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; text-align: center;">
   <figure style="flex: 1 1 300px; max-width: 45%;">
-    <img src="assets/Webpage_Mobile_01.jpg" alt="First Image" style=="width:100%; height:auto; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+    <img src="assets/Webpage_Mobile_01_small.jpg" alt="First Image" style=="width:100%; height:auto; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
     <figcaption style="margin-top: 8px; font-style: italic; color: gray;">Mobile Interface</figcaption>
   </figure>
   <figure style="flex: 1 1 300px; max-width: 45%;">
-    <img src="assets/Webpage_Mobile_02.jpg" alt="Second Image" style=="width:100%; height:auto; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+    <img src="assets/Webpage_Mobile_02_small.jpg" alt="Second Image" style=="width:100%; height:auto; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
     <figcaption style="margin-top: 8px; font-style: italic; color: gray;">Uploaded Image and Selected detected Object (Cat)</figcaption>
   </figure>
 </div>
 
 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; text-align: center;">
   <figure style="flex: 1 1 300px; max-width: 45%;">
-    <img src="assets/Webpage_Mobile_03.jpg" alt="First Image" style=="width:100%; height:auto; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+    <img src="assets/Webpage_Mobile_03_small.jpg" alt="First Image" style=="width:100%; height:auto; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
     <figcaption style="margin-top: 8px; font-style: italic; color: gray;">Results</figcaption>
   </figure>
   <!-- <figure style="flex: 1 1 300px; max-width: 45%;">
-    <img src="assets/Webpage_Mobile_04.jpg" alt="Second Image" style=="width:100%; height:auto; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+    <img src="assets/Webpage_Mobile_04_small.jpg" alt="Second Image" style=="width:100%; height:auto; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
     <figcaption style="margin-top: 8px; font-style: italic; color: gray;">Second Image Caption</figcaption>
   </figure> -->
 </div>
@@ -121,11 +121,11 @@ This project provides a web application for inpainting images, allowing users to
 
 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; text-align: center;">
   <figure style="flex: 1 1 300px; max-width: 45%;">
-    <img src="assets/Webpage_Mobile_04.jpg" alt="First Image" style=="width:100%; height:auto; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+    <img src="assets/Webpage_Mobile_04_small.jpg" alt="First Image" style=="width:100%; height:auto; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
     <figcaption style="margin-top: 8px; font-style: italic; color: gray;">Menu to Select - Interface</figcaption>
   </figure>
   <figure style="flex: 1 1 300px; max-width: 45%;">
-    <img src="assets/Webpage_Mobile_05.jpg" alt="Second Image" style=="width:100%; height:auto; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+    <img src="assets/Webpage_Mobile_05_small.jpg" alt="Second Image" style=="width:100%; height:auto; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
     <figcaption style="margin-top: 8px; font-style: italic; color: gray;">Blurring image example</figcaption>
   </figure>
 </div>
